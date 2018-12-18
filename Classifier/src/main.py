@@ -43,7 +43,7 @@ def getFrameSnapshot(*args):
 		translatedFingerBones['target'] = target
 
 		# Convertendo dicionario em uma linha de arquivo csv.
-		with open('../data/libras.csv', 'a') as csvFile:
+		with open('../data/libras_2.csv', 'a') as csvFile:
 			fieldNames = translatedFingerBones.keys()
 			writer = csv.DictWriter(csvFile, fieldnames=fieldNames)
 			# writer.writeheader()
@@ -71,27 +71,29 @@ def main():
 
 		try:
 			address = (host,port)
-			s.bind(address)
+			#s.bind(address)
 		except socket.error as e:
 			print(e)
 			exit(0)
 
-		s.listen(1)
+		#s.listen(1)
 
-		conn, addr = s.accept()
-		print "conexão aceita"
+		#conn, addr = s.accept()
+		print "conexao aceita"
 		print "ctrl + c para sair"
 
 		# load the model from disk
-		trained_model = open("trained_model.sav", 'r')
+		trained_model = open("../data/svm_model_gs.pkl", "rb")
 		loaded_model = joblib.load(trained_model)
 
 		try:
 			while(True):
 				new_value = getFrameSnapshot(controller)
-				result = loaded_model.predict(new_value)
-				conn.send((result + "\n").encode())
-				print(result)
+				new_value = [i[1] for i in new_value.items()]
+				if len(new_value) != 0:
+					result = loaded_model.predict([new_value])
+					#conn.send((result + "\n").encode())
+					print(result)
 				sleep(1)
 		except(KeyboardInterrupt, socket.error) as e:
 			conn.close()
